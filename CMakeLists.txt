@@ -27,10 +27,10 @@ target_link_libraries(${PROJECT_NAME} blah SDL2)
 # copy SDL2 to the build dir
 # TODO: don't think this is working correctly, need to determine dll name based on target m_type?
 # NOTE: copying it from <target-build-dir>/lib/sdl to <target-build-dir> manually works for now
-set(SDL2_DLL "" CACHE FILEPATH "SDL2 DLL Path")
-if (SDL2_ENABLED)
-    add_custom_command(
-            TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${SDL2_DLL} $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    )
-endif()
+#set(SDL2_DLL "" CACHE FILEPATH "SDL2 DLL Path")
+#if (SDL2_ENABLED)
+#    add_custom_command(
+#            TARGET ${PROJECT_NAME} POST_BUILD
+#            COMMAND ${CMAKE_COMMAND} -E copy ${SDL2_DLL} $<TARGET_FILE_DIR:${PROJECT_NAME}>
+#    )
+#endif()
