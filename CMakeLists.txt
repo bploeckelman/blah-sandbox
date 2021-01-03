@@ -18,6 +18,7 @@ add_executable(${PROJECT_NAME}
         src/world.cpp
         src/content.cpp
         src/components/animator.cpp
+        src/components/collider.cpp
 )
 
 # reference blah and SDL

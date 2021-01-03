@@ -1,16 +1,27 @@
 #include "game.h"
 #include "content.h"
 #include "components/animator.h"
+#include "components/collider.h"
 
 using namespace Zen;
+
+const uint32_t solid = 1 << 0;
 
 void Game::load_map() {
     world.clear();
 
     // add a test entity
-    auto en = world.add_entity(Point(100, 100));
+    auto en = world.add_entity(Point(100, 60));
     auto an = en->add(Animator("player"));
     an->play("idle");
+
+    auto cl = en->add(Collider::make_rect(RectI(-4, -8, 8, 8)));
+
+    auto en2 = world.add_entity(Point(50, 100));
+    auto c2 = en2->add(Collider::make_rect(RectI(0, 0, 100, 16)));
+    c2->mask = solid;
+
+    m_draw_colliders = false;
 }
 
 void Game::startup() {
@@ -48,6 +59,11 @@ void Game::update() {
         load_map();
     }
 
+    auto en = world.first_entity();
+    if (!en->get<Collider>()->check(solid, Point(0, 1))) {
+        en->position.y += 1;
+    }
+
     world.update();
 }
 
@@ -58,13 +74,13 @@ void Game::render() {
 
         world.render(batch);
 
-//        if (m_draw_colliders) {
-//            auto collider = m_world.first<Collider>();
-//            while (collider) {
-//                collider->render(batch);
-//                collider = (Collider *) collider->m_next();
-//            }
-//        }
+        if (m_draw_colliders) {
+            auto collider = world.first<Collider>();
+            while (collider) {
+                collider->render(batch);
+                collider = (Collider *) collider->next();
+            }
+        }
 
         // test some stuffffff
         batch.tex(Content::atlas(), Vec2::zero, Color::white);
