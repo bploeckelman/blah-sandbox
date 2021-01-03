@@ -7,6 +7,8 @@ using namespace Blah;
 
 namespace Zen {
 
+    struct Sprite;
+
     class Content {
     public:
         static SpriteFont font;

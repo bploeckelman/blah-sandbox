@@ -204,6 +204,9 @@ namespace Zen {
         instance->m_type = type;
         instance->m_entity = entity;
 
+        // add it to the live components
+        alive.insert(instance);
+
         // add it to the m_entity
         entity->m_components.push_back(instance);
 

@@ -1,12 +1,16 @@
 #include "game.h"
 #include "content.h"
+#include "components/animator.h"
 
 using namespace Zen;
 
 void Game::load_map() {
     world.clear();
 
-    // TODO: add a test player
+    // add a test entity
+    auto en = world.add_entity(Point(100, 100));
+    auto an = en->add(Animator("player"));
+    an->play("idle");
 }
 
 void Game::startup() {
@@ -52,7 +56,7 @@ void Game::render() {
     {
         buffer->clear(0x4488aa);
 
-//        world.render(batch);
+        world.render(batch);
 
 //        if (m_draw_colliders) {
 //            auto collider = m_world.first<Collider>();
@@ -64,7 +68,8 @@ void Game::render() {
 
         // test some stuffffff
         batch.tex(Content::atlas(), Vec2::zero, Color::white);
-        batch.str(Content::font, "Hello World", Vec2(32, 160), Color::white);
+//        batch.str(Content::font, "Hello World", Vec2(32, 160), Color::white);
+
         batch.render(buffer);
         batch.clear();
     }

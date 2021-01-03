@@ -38,14 +38,14 @@ FilePath Content::path() {
 
 void Content::load() {
     Packer packer;
-    packer.padding = 1;
+    packer.padding = 0;
 
     // load the main font
     font = SpriteFont(path() + "fonts/dogica.ttf", 8, SpriteFont::ASCII);
 
     // load sprites
     Vector<SpriteInfo> sprite_info;
-    uint64_t pack_counter = 0;
+    uint64_t pack_index = 0;
     {
         // get all the sprites
         FilePath sprite_path = path() + "sprites/";
@@ -53,16 +53,16 @@ void Content::load() {
             if (!it.ends_with(".ase")) continue;
 
             SpriteInfo* info = sprite_info.expand();
-            info->name = it.cstr() + sprite_path.length();
+            info->name = String(it.cstr() + sprite_path.length(), it.end() - 4);
             info->aseprite = Aseprite(it.cstr());
         }
 
         // add to the atlas
         for (auto& info : sprite_info) {
-            info.pack_index = pack_counter;
+            info.pack_index = pack_index;
             for (auto& frame : info.aseprite.frames) {
-                packer.add(info.pack_index, frame.image);
-                pack_counter++;
+                packer.add(pack_index, frame.image);
+                pack_index++;
             }
         }
     }
