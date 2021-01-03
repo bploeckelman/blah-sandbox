@@ -16,6 +16,7 @@ add_executable(${PROJECT_NAME}
         src/main.cpp
         src/game.cpp
         src/world.cpp
+        src/content.cpp
 )
 
 # reference blah and SDL

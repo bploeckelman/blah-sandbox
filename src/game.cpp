@@ -1,20 +1,7 @@
 #include "game.h"
+#include "content.h"
 
 using namespace Zen;
-
-void Game::startup() {
-    // TODO: load assets
-
-    // create framebuffer for the game
-    buffer = FrameBuffer::create(320, 180);
-
-    // set batch to use nearest filtering
-    batch.default_sampler = TextureSampler(TextureFilter::Nearest);
-
-    // TODO: set flags (eg. draw colliders)
-
-    load_map();
-}
 
 void Game::load_map() {
     world.clear();
@@ -22,8 +9,26 @@ void Game::load_map() {
     // TODO: add a test player
 }
 
-void Game::shutdown() {
+void Game::startup() {
+    // load assets
+    Content::load();
 
+    // create framebuffer for the game
+    buffer = FrameBuffer::create(width, height);
+
+    // set batch to use nearest filtering
+    batch.default_sampler = TextureSampler(TextureFilter::Nearest);
+
+    // set flags
+    m_draw_colliders = false;
+
+    // load the world
+    load_map();
+}
+
+void Game::shutdown() {
+    // unload assets
+    Content::unload();
 }
 
 void Game::update() {
@@ -31,10 +36,9 @@ void Game::update() {
         App::exit();
     }
 
-    // TODO: toggle flag
-//    if (Input::pressed(Key::F1)) {
-//        draw_colliders = !draw_colliders;
-//    }
+    if (Input::pressed(Key::F1)) {
+        m_draw_colliders = !m_draw_colliders;
+    }
 
     if (Input::pressed(Key::F2)) {
         load_map();
@@ -48,21 +52,27 @@ void Game::render() {
     {
         buffer->clear(0x4488aa);
 
-        world.render(batch);
+//        world.render(batch);
 
-//        if (draw_colliders) {
+//        if (m_draw_colliders) {
 //            auto collider = m_world.first<Collider>();
 //            while (collider) {
 //                collider->render(batch);
 //                collider = (Collider *) collider->m_next();
 //            }
 //        }
+
+        // test some stuffffff
+        batch.tex(Content::atlas(), Vec2::zero, Color::white);
+        batch.str(Content::font, "Hello World", Vec2(32, 160), Color::white);
+        batch.render(buffer);
+        batch.clear();
     }
 
     // draw buffer to the screen
     {
         float scale = Calc::min(
-                App::backbuffer->width() / (float) buffer->width(),
+                App::backbuffer->width()  / (float) buffer->width(),
                 App::backbuffer->height() / (float) buffer->height()
         );
 
