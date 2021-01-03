@@ -15,6 +15,7 @@ add_subdirectory(libs/blah)
 add_executable(${PROJECT_NAME}
         src/main.cpp
         src/game.cpp
+        src/world.cpp
 )
 
 # reference blah and SDL
@@ -22,7 +23,7 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} blah SDL2)
 
 # copy SDL2 to the build dir
-# TODO: don't think this is working correctly, need to determine dll name based on target type?
+# TODO: don't think this is working correctly, need to determine dll name based on target m_type?
 # NOTE: copying it from <target-build-dir>/lib/sdl to <target-build-dir> manually works for now
 set(SDL2_DLL "" CACHE FILEPATH "SDL2 DLL Path")
 if (SDL2_ENABLED)

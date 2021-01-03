@@ -7,6 +7,9 @@ using namespace Zen;
 
 namespace {
 
+    const int windowWidth = 1280;
+    const int windowHeight = 720;
+
     Game game;
 
     void startup() {
@@ -32,8 +35,9 @@ namespace {
 int main() {
     Config config;
     config.name = "Blah Sandbox";
-    config.width = 320;
-    config.height = 240;
+    config.width = windowWidth;
+    config.height = windowHeight;
+
     config.on_startup = startup;
     config.on_shutdown = shutdown;
     config.on_update = update;
