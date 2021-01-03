@@ -1,7 +1,3 @@
-//
-// Created by Brian on 1/2/2021.
-//
-
 #include "game.h"
 
 using namespace Zen;
