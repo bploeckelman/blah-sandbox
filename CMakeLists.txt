@@ -19,6 +19,8 @@ add_executable(${PROJECT_NAME}
         src/content.cpp
         src/components/animator.cpp
         src/components/collider.cpp
+        src/components/player.cpp
+        src/components/mover.cpp
 )
 
 # reference blah and SDL

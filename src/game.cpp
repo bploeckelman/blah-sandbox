@@ -1,11 +1,12 @@
 #include "game.h"
+#include "masks.h"
 #include "content.h"
 #include "components/animator.h"
 #include "components/collider.h"
+#include "components/mover.h"
 
 using namespace Zen;
 
-const uint32_t solid = 1 << 0;
 
 void Game::load_map() {
     world.clear();
@@ -13,15 +14,18 @@ void Game::load_map() {
     // add a test entity
     auto en = world.add_entity(Point(100, 60));
     auto an = en->add(Animator("player"));
+    auto col = en->add(Collider::make_rect(RectI(-4, -8, 8, 8)));
+    auto mover = en->add(Mover());
+
+    mover->collider = col;
+    mover->speed = Vec2(5, 20);
     an->play("idle");
 
-    auto cl = en->add(Collider::make_rect(RectI(-4, -8, 8, 8)));
+    auto floor = world.add_entity(Point(50, 100));
+    auto c2 = floor->add(Collider::make_rect(RectI(0, 0, 100, 16)));
+    c2->mask = Mask::solid;
 
-    auto en2 = world.add_entity(Point(50, 100));
-    auto c2 = en2->add(Collider::make_rect(RectI(0, 0, 100, 16)));
-    c2->mask = solid;
-
-    m_draw_colliders = false;
+    m_draw_colliders = true;
 }
 
 void Game::startup() {
@@ -60,7 +64,7 @@ void Game::update() {
     }
 
     auto en = world.first_entity();
-    if (!en->get<Collider>()->check(solid, Point(0, 1))) {
+    if (!en->get<Collider>()->check(Mask::solid, Point(0, 1))) {
         en->position.y += 1;
     }
 
