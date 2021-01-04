@@ -2,12 +2,14 @@
 #include <blah.h>
 
 #include "assets/sprite.h"
+#include "assets/tileset.h"
 
 using namespace Blah;
 
 namespace Zen {
 
     struct Sprite;
+    struct Tileset;
 
     class Content {
     public:
@@ -19,6 +21,7 @@ namespace Zen {
         static TextureRef atlas();
 
         static const Sprite* find_sprite(const char* name);
+        static const Tileset* find_tileset(const char* name);
     };
 
 }

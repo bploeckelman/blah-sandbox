@@ -11,11 +11,13 @@ void Game::load_map() {
     world.clear();
 
     // add a player
-    Factory::player(&world, Point(50, 50));
+    Factory::player(&world, Point(width / 2, height - 32));
 
     // add a floor
-    auto floor = world.add_entity(Point(0, 100));
-    auto c2 = floor->add(Collider::make_rect(RectI(0, 0, 320, 16)));
+    auto floor = world.add_entity();
+    auto c2 = floor->add(Collider::make_grid(8, 40, 23));
+    c2->set_cells(0, 20, 40, 3, true);
+    c2->set_cells(0, 18, 10, 2, true);
     c2->mask = Mask::solid;
 
     // set flags to initial state

@@ -1,4 +1,5 @@
 #include "content.h"
+#include "game.h"
 
 using namespace Blah;
 using namespace Zen;
@@ -6,6 +7,7 @@ using namespace Zen;
 namespace {
     FilePath root;
     Vector<Sprite> sprites;
+    Vector<Tileset> tilesets;
     Vector<Subtexture> subtextures;
     TextureRef sprite_atlas;
 
@@ -55,14 +57,41 @@ void Content::load() {
             SpriteInfo* info = sprite_info.expand();
             info->name = String(it.cstr() + sprite_path.length(), it.end() - 4);
             info->aseprite = Aseprite(it.cstr());
-        }
+            info->pack_index = pack_index;
 
-        // add to the atlas
-        for (auto& info : sprite_info) {
-            info.pack_index = pack_index;
-            for (auto& frame : info.aseprite.frames) {
+            // add to the atlas
+            for (auto& frame : info->aseprite.frames) {
                 packer.add(pack_index, frame.image);
                 pack_index++;
+            }
+        }
+    }
+
+    // load tilesets
+    Vector<SpriteInfo> tileset_info;
+    {
+        // get all the tilesets
+        FilePath tileset_path = path() + "tilesets/";
+        for (auto& it : Directory::enumerate(tileset_path, true)) {
+            if (!it.ends_with(".ase")) continue;
+
+            SpriteInfo* info = tileset_info.expand();
+            info->name = String(it.cstr() + tileset_path.length(), it.end() - 4);
+            info->aseprite = Aseprite(it.cstr());
+            info->pack_index = pack_index;
+
+            auto& frame = info->aseprite.frames[0];
+            auto columns = frame.image.width / Game::tile_width;
+            auto rows = frame.image.height / Game::tile_height;
+
+            // split into grid and add subimages to atlas
+            for (int x = 0; x < columns; x++) {
+                for (int y = 0; y < rows; y++) {
+                    auto subrect = RectI(x * Game::tile_width, y * Game::tile_height, Game::tile_width, Game::tile_height);
+                    auto subimage = frame.image.get_sub_image(subrect);
+                    packer.add(pack_index, subimage);
+                    pack_index++;
+                }
             }
         }
     }
@@ -101,6 +130,24 @@ void Content::load() {
             }
         }
     }
+
+    // add tilesets
+    for (auto& info : tileset_info) {
+        auto& frame = info.aseprite.frames[0];
+
+        Tileset* tileset = tilesets.expand();
+        tileset->name = info.name;
+        tileset->columns = frame.image.width / Game::tile_width;
+        tileset->rows = frame.image.height / Game::tile_height;
+
+        // split into grid and add subimages to atlas
+        for (int x = 0, i = info.pack_index; x < tileset->columns; x++) {
+            for (int y = 0; y < tileset->rows; y++) {
+                tileset->tiles[x + y * tileset->columns] = subtextures[i];
+                i++;
+            }
+        }
+    }
 }
 
 void Content::unload() {
@@ -113,6 +160,15 @@ TextureRef Content::atlas() {
 
 const Sprite* Content::find_sprite(const char *name) {
     for (auto& it : sprites) {
+        if (it.name == name) {
+            return &it;
+        }
+    }
+    return nullptr;
+}
+
+const Tileset *Content::find_tileset(const char *name) {
+    for (auto& it : tilesets) {
         if (it.name == name) {
             return &it;
         }

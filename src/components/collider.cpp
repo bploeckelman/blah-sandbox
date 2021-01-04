@@ -22,6 +22,9 @@ Collider Collider::make_grid(int tile_size, int columns, int rows) {
     collider.m_grid.columns = columns;
     collider.m_grid.rows = rows;
     collider.m_grid.cells = std::shared_ptr<bool[]>(new bool[columns * rows]);
+
+    memset(collider.m_grid.cells.get(), 0, sizeof(bool) * columns * rows);
+
     return collider;
 }
 
@@ -51,6 +54,14 @@ void Collider::set_cell(int x, int y, bool value) {
     BLAH_ASSERT(x >= 0 && y >= 0 && x < m_grid.columns && y < m_grid.rows, "Cell is out of bounds!");
 
     m_grid.cells[x + y * m_grid.columns] = value;
+}
+
+void Collider::set_cells(int x, int y, int w, int h, bool value) {
+    for (int ix = x; ix < x + w; ix++) {
+        for (int iy = y; iy < y + h; iy++) {
+            set_cell(ix, iy, value);
+        }
+    }
 }
 
 bool Collider::check(uint32_t mask, Point offset) const {
@@ -115,6 +126,24 @@ bool Collider::rect_to_rect(const Collider *a, const Collider *b, Point offset) 
 }
 
 bool Collider::rect_to_grid(const Collider *a, const Collider *b, Point offset) {
-    // TODO
+    // get a relative rectangle to the grid
+    RectI rect = a->m_rect + a->entity()->position + offset - b->entity()->position;
+
+    // get the cells the rectangle overlaps
+    int left   = Calc::clamp_int(Calc::floor  (rect.x        / (float) b->m_grid.tile_size), 0, b->m_grid.columns);
+    int right  = Calc::clamp_int(Calc::ceiling(rect.right()  / (float) b->m_grid.tile_size), 0, b->m_grid.columns);
+    int top    = Calc::clamp_int(Calc::floor  (rect.y        / (float) b->m_grid.tile_size), 0, b->m_grid.rows);
+    int bottom = Calc::clamp_int(Calc::ceiling(rect.bottom() / (float) b->m_grid.tile_size), 0, b->m_grid.rows);
+
+    // check each cell
+    for (int x = left; x < right; x++) {
+        for (int y = top; y < bottom; y++) {
+            if (b->m_grid.cells[x + y * b->m_grid.columns]) {
+                return true;
+            }
+        }
+    }
+
+    // all cells were empty
     return false;
 }
