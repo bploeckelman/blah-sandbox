@@ -1,9 +1,8 @@
 #include "game.h"
 #include "masks.h"
 #include "content.h"
-#include "components/animator.h"
+#include "factory.h"
 #include "components/collider.h"
-#include "components/mover.h"
 
 using namespace Zen;
 
@@ -11,15 +10,8 @@ using namespace Zen;
 void Game::load_map() {
     world.clear();
 
-    // add a test entity
-    auto en = world.add_entity(Point(100, 60));
-    auto an = en->add(Animator("player"));
-    auto col = en->add(Collider::make_rect(RectI(-4, -8, 8, 8)));
-    auto mover = en->add(Mover());
-
-    mover->collider = col;
-    mover->speed = Vec2(5, 20);
-    an->play("idle");
+    // add a player
+    Factory::player(&world, Point(50, 50));
 
     auto floor = world.add_entity(Point(50, 100));
     auto c2 = floor->add(Collider::make_rect(RectI(0, 0, 100, 16)));
@@ -61,11 +53,6 @@ void Game::update() {
 
     if (Input::pressed(Key::F2)) {
         load_map();
-    }
-
-    auto en = world.first_entity();
-    if (!en->get<Collider>()->check(Mask::solid, Point(0, 1))) {
-        en->position.y += 1;
     }
 
     world.update();

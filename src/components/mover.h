@@ -12,8 +12,9 @@ namespace Zen {
         Vec2 m_remainder;
 
     public:
-        Collider* collider;
+        Collider* collider = nullptr;
         Vec2 speed;
+        float gravity = 0;
 
         bool move_x(int amount);
         bool move_y(int amount);
@@ -21,6 +22,8 @@ namespace Zen {
         void stop_x();
         void stop_y();
         void stop();
+
+        bool on_ground(int dist = 1) const;
 
         void update() override;
 

@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME}
         src/game.cpp
         src/world.cpp
         src/content.cpp
+        src/factory.cpp
         src/components/animator.cpp
         src/components/collider.cpp
         src/components/player.cpp
