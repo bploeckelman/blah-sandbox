@@ -9,13 +9,15 @@ namespace Zen {
     // technically PlayerController would be more accurate
     class Player : public Component {
     public:
-        VirtualButton btn_jump;
+        VirtualStick input_move;
+        VirtualButton input_jump;
 
         Player();
 
         void update() override;
 
     private:
+        float m_jump_timer = 0;
 
     };
 

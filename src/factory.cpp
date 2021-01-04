@@ -16,7 +16,6 @@ Entity* Factory::player(World* world, Point position) {
 
     auto mover = en->add(Mover());
     mover->collider = hitbox;
-    mover->gravity = 120;
 
     en->add(Player());
 

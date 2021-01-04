@@ -13,10 +13,12 @@ void Game::load_map() {
     // add a player
     Factory::player(&world, Point(50, 50));
 
-    auto floor = world.add_entity(Point(50, 100));
-    auto c2 = floor->add(Collider::make_rect(RectI(0, 0, 100, 16)));
+    // add a floor
+    auto floor = world.add_entity(Point(0, 100));
+    auto c2 = floor->add(Collider::make_rect(RectI(0, 0, 320, 16)));
     c2->mask = Mask::solid;
 
+    // set flags to initial state
     m_draw_colliders = true;
 }
 
