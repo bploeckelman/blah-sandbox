@@ -3,6 +3,7 @@
 #include "content.h"
 #include "factory.h"
 #include "components/collider.h"
+#include "components/tilemap.h"
 
 using namespace Zen;
 
@@ -13,8 +14,15 @@ void Game::load_map() {
     // add a player
     Factory::player(&world, Point(width / 2, height - 32));
 
+    // get the castle tileset for now
+    auto castle = Content::find_tileset("castle");
+
     // add a floor
     auto floor = world.add_entity();
+    auto tm = floor->add(Tilemap(8, 8, 40, 23));
+    tm->set_cells(0, 20, 40, 3, &castle->tiles[0]);
+    tm->set_cells(0, 18, 10, 2, &castle->tiles[0]);
+
     auto c2 = floor->add(Collider::make_grid(8, 40, 23));
     c2->set_cells(0, 20, 40, 3, true);
     c2->set_cells(0, 18, 10, 2, true);

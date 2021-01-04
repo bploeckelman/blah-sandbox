@@ -18,11 +18,13 @@ add_executable(${PROJECT_NAME}
         src/world.cpp
         src/content.cpp
         src/factory.cpp
+        src/assets/tileset.cpp
         src/components/animator.cpp
         src/components/collider.cpp
         src/components/player.cpp
         src/components/mover.cpp
-        src/assets/tileset.cpp src/assets/tileset.h)
+        src/components/tilemap.cpp
+)
 
 # reference blah and SDL
 # NOTE: without linking SDL here we get unresolved externals during the link step for blah
