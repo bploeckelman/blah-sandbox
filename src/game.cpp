@@ -19,13 +19,13 @@ void Game::load_map() {
 
     // add a floor
     auto floor = world.add_entity();
-    auto tm = floor->add(Tilemap(8, 8, 40, 23));
-    tm->set_cells(0, 20, 40, 3, &castle->tiles[0]);
-    tm->set_cells(0, 18, 10, 2, &castle->tiles[0]);
+    auto tm = floor->add(Tilemap(8, 8, columns, rows));
+    tm->set_cells(0, rows - 3, columns, 3, &castle->tiles[0]);
+    tm->set_cells(0, rows - 5, 8, 2, &castle->tiles[0]);
 
-    auto c2 = floor->add(Collider::make_grid(8, 40, 23));
-    c2->set_cells(0, 20, 40, 3, true);
-    c2->set_cells(0, 18, 10, 2, true);
+    auto c2 = floor->add(Collider::make_grid(8, columns, rows));
+    c2->set_cells(0, rows - 3, columns, 3, true);
+    c2->set_cells(0, rows - 5, 8, 2, true);
     c2->mask = Mask::solid;
 
     // set flags to initial state
@@ -73,7 +73,7 @@ void Game::update() {
 void Game::render() {
     // draw gameplay stuff
     {
-        buffer->clear(0x4488aa);
+        buffer->clear(0x150e22);
 
         world.render(batch);
 
@@ -84,10 +84,6 @@ void Game::render() {
                 collider = (Collider *) collider->next();
             }
         }
-
-        // test some stuffffff
-        batch.tex(Content::atlas(), Vec2::zero, Color::white);
-//        batch.str(Content::font, "Hello World", Vec2(32, 160), Color::white);
 
         batch.render(buffer);
         batch.clear();
