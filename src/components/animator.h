@@ -9,6 +9,7 @@ namespace Zen {
     class Animator : public Component {
     private:
         const Sprite* m_sprite = nullptr;
+        int m_facing = 1;
         int m_animation_index = 0;
         int m_frame_index = 0;
         float m_frame_counter = 0;

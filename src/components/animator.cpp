@@ -47,13 +47,14 @@ void Animator::update() {
 void Animator::render(Batch& batch) {
     if (in_valid_state()) {
         auto mover = get<Mover>();
-        Vec2 scale = Vec2(1, 1);
         if (mover) {
-            bool facingLeft = (mover->speed.x < 0);
-            if (facingLeft) {
-                scale.x = -1;
+            if (m_facing == -1 && mover->speed.x > 0) {
+                m_facing = 1;
+            } else if (m_facing == 1 && mover->speed.x < 0) {
+                m_facing = -1;
             }
         }
+        Vec2 scale = Vec2(m_facing, 1);
 
         batch.push_matrix(Mat3x2::create_transform(entity()->position, m_sprite->origin, scale, 0));
 
