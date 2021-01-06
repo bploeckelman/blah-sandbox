@@ -13,7 +13,7 @@ Entity* Factory::player(World* world, Point position) {
     an->play("idle");
     an->depth = -10;
 
-    auto hitbox = en->add(Collider::make_rect(RectI(-4, -8, 8, 8)));
+    auto hitbox = en->add(Collider::make_rect(RectI(-4, -16, 8, 16)));
 
     auto mover = en->add(Mover());
     mover->collider = hitbox;
