@@ -2,25 +2,31 @@
 #include "masks.h"
 #include "content.h"
 #include "factory.h"
+#include "components/player.h"
 #include "components/collider.h"
 #include "components/tilemap.h"
 
 using namespace Zen;
 
+namespace {
+    constexpr float transition_duration = 0.75f;
+}
 
 void Game::load_room(Point cell) {
     const Image* grid = Content::find_room(cell);
     BLAH_ASSERT(grid != nullptr, "Room doesn't exist!");
     room = cell;
 
-    // destroy all entities
-    world.clear();
+    // get room offset
+    auto offset = Point(cell.x * width, cell.y * height);
 
-    // get the castle tileset for now
+    // get the tilesets
     auto castle = Content::find_tileset("castle");
+    auto grass = Content::find_tileset("grass");
+    auto plants = Content::find_tileset("plants");
 
     // add a floor
-    auto floor = world.add_entity();
+    auto floor = world.add_entity(offset);
     auto tilemap = floor->add(Tilemap(8, 8, columns, rows));
     auto solids = floor->add(Collider::make_grid(8, 40, 23));
     solids->mask = Mask::solid;
@@ -28,6 +34,7 @@ void Game::load_room(Point cell) {
     // loop over the room grid
     for (int x = 0; x < columns; x++) {
         for (int y = 0; y < rows; y++) {
+            Point world_position = offset + Point(x * tile_width, y * tile_height);
             Color col = grid->pixels[x + y * columns];
             uint32_t rgb = ((uint32_t)col.r << 16)
                          | ((uint32_t)col.g << 8)
@@ -35,14 +42,25 @@ void Game::load_room(Point cell) {
             switch (rgb) {
                 // black does nothing
                 case 0x000000: break;
-                // white is solids
+                // white is castle
                 case 0xffffff: {
                     tilemap->set_cell(x, y, &castle->random_tile());
                     solids->set_cell(x, y, true);
                 } break;
-                // green is player
+                // pale green is grass
+                case 0x8f974a: {
+                    tilemap->set_cell(x, y, &grass->random_tile());
+                    solids->set_cell(x, y, true);
+                } break;
+                // dark green is plants (not solid)
+                case 0x4b692f: {
+                    tilemap->set_cell(x, y, &plants->random_tile());
+                } break;
+                // green is player (only create if it doesn't already exist)
                 case 0x6abe30: {
-                    Factory::player(&world, Point(x * tile_width + tile_width / 2, (y + 1) * tile_height));
+                    if (!world.first<Player>()) {
+                        Factory::player(&world, world_position + Point(tile_width / 2, tile_height));
+                    }
                 } break;
             }
         }
@@ -62,7 +80,8 @@ void Game::startup() {
     // set flags
     m_draw_colliders = false;
 
-    // load the world
+    // camera setup
+    camera = Vec2::zero;
     load_room(Point(0, 0));
 }
 
@@ -72,19 +91,84 @@ void Game::shutdown() {
 }
 
 void Game::update() {
+    // quick exit
     if (Input::pressed(Key::Escape)) {
         App::exit();
     }
 
+    // toggle collider render
     if (Input::pressed(Key::F1)) {
         m_draw_colliders = !m_draw_colliders;
     }
 
+    // reload current room
     if (Input::pressed(Key::F2)) {
+        // not transitioning
+        m_transition = false;
+        // destroy all entities
+        world.clear();
+        // reload room
         load_room(room);
     }
 
-    world.update();
+    // normal update
+    if (!m_transition) {
+        world.update();
+
+        auto player = world.first<Player>();
+        if (player) {
+            auto pos = player->entity()->position;
+            auto bounds = RectI(room.x * width, room.y * height, width, height);
+            if (!bounds.contains(pos)) {
+                // target room
+                Point next_room = Point(pos.x / width, pos.y / height);
+                if (pos.x < 0) next_room.x--;
+                if (pos.y < 0) next_room.y--;
+
+                // see if room exists
+                if (Content::find_room(next_room)) {
+                    // transition to next room
+                    m_transition = true;
+                    m_next_ease = 0;
+                    m_next_room = next_room;
+                    m_last_room = room;
+
+                    // store entities from the previous room
+                    m_last_entities.clear();
+                    Entity* e = world.first_entity();
+                    while (e) {
+                        m_last_entities.push_back(e);
+                        e = e->next();
+                    }
+
+                    // load contents of the next room
+                    load_room(next_room);
+                } else {
+                    // no next room, keep player in this room
+                    player->entity()->position = Point(
+                            Calc::clamp_int(pos.x, bounds.x, bounds.x + bounds.w),
+                            Calc::clamp_int(pos.y, bounds.y, bounds.y + bounds.h));
+                }
+            }
+        }
+    } else {
+        auto last_cam = Vec2(m_last_room.x * width, m_last_room.y * height);
+        auto next_cam = Vec2(m_next_room.x * width, m_next_room.y * height);
+
+        // room transition routine
+        m_next_ease = Calc::approach(m_next_ease, 1.0f, Time::delta / transition_duration);
+        camera = last_cam + (next_cam - last_cam) * Ease::cube_in_out(m_next_ease);
+
+        if (m_next_ease >= 1.0f) {
+            // delete old objects (except player)
+            for (auto& it : m_last_entities) {
+                if (it->get<Player>()) continue;
+                world.destroy_entity(it);
+            }
+
+            m_transition = false;
+        }
+    }
 }
 
 void Game::render() {
@@ -92,15 +176,19 @@ void Game::render() {
     {
         buffer->clear(0x150e22);
 
-        world.render(batch);
+        batch.push_matrix(Mat3x2::create_translation(-camera));
+        {
+            world.render(batch);
 
-        if (m_draw_colliders) {
-            auto collider = world.first<Collider>();
-            while (collider) {
-                collider->render(batch);
-                collider = (Collider *) collider->next();
+            if (m_draw_colliders) {
+                auto collider = world.first<Collider>();
+                while (collider) {
+                    collider->render(batch);
+                    collider = (Collider *) collider->next();
+                }
             }
         }
+        batch.pop_matrix();
 
         batch.render(buffer);
         batch.clear();

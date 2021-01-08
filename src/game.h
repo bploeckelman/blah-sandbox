@@ -20,6 +20,7 @@ namespace Zen {
         FrameBufferRef buffer;
         Batch batch;
         Point room;
+        Vec2 camera;
 
         void load_room(Point cell);
         void startup();
@@ -29,6 +30,11 @@ namespace Zen {
 
     private:
         bool m_draw_colliders;
+        bool m_transition = false;
+        float m_next_ease;
+        Point m_next_room;
+        Point m_last_room;
+        Vector<Entity*> m_last_entities;
     };
 
 }
