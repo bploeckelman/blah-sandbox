@@ -1,5 +1,4 @@
 #include "animator.h"
-#include "mover.h"
 #include "../content.h"
 
 using namespace Zen;
@@ -46,16 +45,6 @@ void Animator::update() {
 
 void Animator::render(Batch& batch) {
     if (in_valid_state()) {
-        auto mover = get<Mover>();
-        if (mover) {
-            if (m_facing == -1 && mover->speed.x > 0) {
-                m_facing = 1;
-            } else if (m_facing == 1 && mover->speed.x < 0) {
-                m_facing = -1;
-            }
-        }
-        Vec2 scale = Vec2(m_facing, 1);
-
         batch.push_matrix(Mat3x2::create_transform(entity()->position, m_sprite->origin, scale, 0));
 
         auto& anim = m_sprite->animations[m_animation_index];

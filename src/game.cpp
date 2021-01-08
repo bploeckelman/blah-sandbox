@@ -27,9 +27,6 @@ void Game::load_map() {
     c2->set_cells(0, rows - 3, columns, 3, true);
     c2->set_cells(0, rows - 5, 8, 2, true);
     c2->mask = Mask::solid;
-
-    // set flags to initial state
-    m_draw_colliders = true;
 }
 
 void Game::startup() {

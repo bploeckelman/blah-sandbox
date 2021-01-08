@@ -17,7 +17,9 @@ namespace Zen {
         void update() override;
 
     private:
+        int m_facing = 1;
         float m_jump_timer = 0;
+        float m_on_ground = false;
 
     };
 

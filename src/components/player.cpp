@@ -1,5 +1,6 @@
 #include "player.h"
 #include "mover.h"
+#include "animator.h"
 
 using namespace Zen;
 
@@ -25,6 +26,7 @@ Player::Player() {
     input_jump = VirtualButton()
             .press_buffer(0.15f)
             .add_key(Key::X)
+            .add_key(Key::Space)
             .add_button(0, Button::A);
 }
 void Player::update() {
@@ -32,16 +34,32 @@ void Player::update() {
     input_jump.update();
 
     auto mover = get<Mover>();
-    auto on_ground = mover->on_ground();
+    auto anim = get<Animator>();
+    auto was_on_ground = m_on_ground;
+    m_on_ground = mover->on_ground();
     int input = input_move.value_i().x;
+
+    // sprite stuff
+    {
+        // land squish
+        if (!was_on_ground && m_on_ground) {
+            anim->scale = Vec2(m_facing * 1.5f, 0.7f);
+        }
+
+        // lerp scale back to one
+        anim->scale = Calc::approach(anim->scale, Vec2(m_facing, 1.0f), Time::delta * 4);
+
+        // set facing
+        anim->scale.x = Calc::abs(anim->scale.x) * m_facing;
+    }
 
     // horizontal movement
     {
         // acceleration
-        mover->speed.x += input * (on_ground ? ground_accel : air_accel) * Time::delta;
+        mover->speed.x += input * (m_on_ground ? ground_accel : air_accel) * Time::delta;
 
         // max speed
-        auto maxspd = (on_ground ? max_ground_speed : max_air_speed);
+        auto maxspd = (m_on_ground ? max_ground_speed : max_air_speed);
         if (Calc::abs(mover->speed.x) > maxspd) {
             mover->speed.x = Calc::approach(
                     mover->speed.x,
@@ -50,13 +68,18 @@ void Player::update() {
         }
 
         // friction
-        if (input == 0 && on_ground) {
+        if (input == 0 && m_on_ground) {
             mover->speed.x = Calc::approach(mover->speed.x, 0, friction * Time::delta);
+        }
+
+        // facing direction
+        if (input != 0 && m_on_ground) {
+            m_facing = input;
         }
     }
 
     // gravity
-    if (!on_ground) {
+    if (!m_on_ground) {
         // make gravity more 'hovery' when in the air
         float grav = gravity;
         if (Calc::abs(mover->speed.y) < 20 && input_jump.down()) {
@@ -69,7 +92,10 @@ void Player::update() {
     // jomping
     {
         // do the jomp
-        if (input_jump.pressed() && on_ground) {
+        if (input_jump.pressed() && m_on_ground) {
+            // squoosh on jomp
+            anim->scale = Vec2(m_facing * 0.65f, 1.4f);
+
             // tweak horizontal movement when jumping
             mover->speed.x = input * max_air_speed;
             m_jump_timer = jump_time;
