@@ -19,8 +19,9 @@ namespace Zen {
         World world;
         FrameBufferRef buffer;
         Batch batch;
+        Point room;
 
-        void load_map();
+        void load_room(Point cell);
         void startup();
         void shutdown();
         void update();

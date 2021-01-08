@@ -8,25 +8,45 @@
 using namespace Zen;
 
 
-void Game::load_map() {
-    world.clear();
+void Game::load_room(Point cell) {
+    const Image* grid = Content::find_room(cell);
+    BLAH_ASSERT(grid != nullptr, "Room doesn't exist!");
+    room = cell;
 
-    // add a player
-    Factory::player(&world, Point(width / 2, height - 32));
+    // destroy all entities
+    world.clear();
 
     // get the castle tileset for now
     auto castle = Content::find_tileset("castle");
 
     // add a floor
     auto floor = world.add_entity();
-    auto tm = floor->add(Tilemap(8, 8, columns, rows));
-    tm->set_cells(0, rows - 3, columns, 3, &castle->tiles[0]);
-    tm->set_cells(0, rows - 5, 8, 2, &castle->tiles[0]);
+    auto tilemap = floor->add(Tilemap(8, 8, columns, rows));
+    auto solids = floor->add(Collider::make_grid(8, 40, 23));
+    solids->mask = Mask::solid;
 
-    auto c2 = floor->add(Collider::make_grid(8, columns, rows));
-    c2->set_cells(0, rows - 3, columns, 3, true);
-    c2->set_cells(0, rows - 5, 8, 2, true);
-    c2->mask = Mask::solid;
+    // loop over the room grid
+    for (int x = 0; x < columns; x++) {
+        for (int y = 0; y < rows; y++) {
+            Color col = grid->pixels[x + y * columns];
+            uint32_t rgb = ((uint32_t)col.r << 16)
+                         | ((uint32_t)col.g << 8)
+                         | ((uint32_t)col.b << 0);
+            switch (rgb) {
+                // black does nothing
+                case 0x000000: break;
+                // white is solids
+                case 0xffffff: {
+                    tilemap->set_cell(x, y, &castle->random_tile());
+                    solids->set_cell(x, y, true);
+                } break;
+                // green is player
+                case 0x6abe30: {
+                    Factory::player(&world, Point(x * tile_width + tile_width / 2, (y + 1) * tile_height));
+                } break;
+            }
+        }
+    }
 }
 
 void Game::startup() {
@@ -43,7 +63,7 @@ void Game::startup() {
     m_draw_colliders = false;
 
     // load the world
-    load_map();
+    load_room(Point(0, 0));
 }
 
 void Game::shutdown() {
@@ -61,7 +81,7 @@ void Game::update() {
     }
 
     if (Input::pressed(Key::F2)) {
-        load_map();
+        load_room(room);
     }
 
     world.update();
