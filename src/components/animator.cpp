@@ -8,13 +8,16 @@ Animator::Animator(const String& sprite) {
     m_animation_index = 0;
 }
 
-void Animator::play(const String& animation) {
+void Animator::play(const String& animation, bool restart) {
     BLAH_ASSERT(m_sprite, "No Sprite Assigned!");
 
     for (int i = 0; i < m_sprite->animations.size(); i++) {
         if (m_sprite->animations[i].name == animation) {
-            m_animation_index = i;
-            m_frame_index = 0;
+            if (m_animation_index != i || restart) {
+                m_animation_index = i;
+                m_frame_index = 0;
+                m_frame_counter = 0;
+            }
             break;
         }
     }

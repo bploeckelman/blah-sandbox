@@ -51,6 +51,17 @@ void Player::update() {
 
         // set facing
         anim->scale.x = Calc::abs(anim->scale.x) * m_facing;
+
+        // update animation
+        if (m_on_ground) {
+            if (input != 0) {
+                anim->play("run");
+            } else {
+                anim->play("idle");
+            }
+        } else {
+            anim->play("jump");
+        }
     }
 
     // horizontal movement
