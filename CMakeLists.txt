@@ -19,6 +19,7 @@ add_executable(${PROJECT_NAME}
         src/content.cpp
         src/factory.cpp
         src/assets/tileset.cpp
+        src/assets/sprite.cpp
         src/components/animator.cpp
         src/components/collider.cpp
         src/components/player.cpp

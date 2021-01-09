@@ -19,6 +19,8 @@ namespace Zen {
         Animator() = default;
         Animator(const String& sprite);
 
+        const Sprite* sprite() const;
+
         void play(const String& animation, bool restart = false);
 
         void update() override;

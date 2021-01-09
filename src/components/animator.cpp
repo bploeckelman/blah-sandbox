@@ -8,6 +8,10 @@ Animator::Animator(const String& sprite) {
     m_animation_index = 0;
 }
 
+const Sprite* Animator::sprite() const {
+    return m_sprite;
+}
+
 void Animator::play(const String& animation, bool restart) {
     BLAH_ASSERT(m_sprite, "No Sprite Assigned!");
 

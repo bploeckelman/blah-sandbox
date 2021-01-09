@@ -28,10 +28,16 @@ Player::Player() {
             .add_key(Key::X)
             .add_key(Key::Space)
             .add_button(0, Button::A);
+
+    input_attack = VirtualButton()
+            .press_buffer(0.15f)
+            .add_key(Key::Z)
+            .add_button(0, Button::X);
 }
 void Player::update() {
     input_move.update();
     input_jump.update();
+    input_attack.update();
 
     auto mover = get<Mover>();
     auto anim = get<Animator>();
@@ -51,8 +57,11 @@ void Player::update() {
 
         // set facing
         anim->scale.x = Calc::abs(anim->scale.x) * m_facing;
+    }
 
-        // update animation
+    // NORMAL STATE
+    if (m_state == st_normal) {
+        // current animation
         if (m_on_ground) {
             if (input != 0) {
                 anim->play("run");
@@ -62,30 +71,78 @@ void Player::update() {
         } else {
             anim->play("jump");
         }
+
+        // horizontal movement
+        {
+            // acceleration
+            mover->speed.x += input * (m_on_ground ? ground_accel : air_accel) * Time::delta;
+
+            // max speed
+            auto maxspd = (m_on_ground ? max_ground_speed : max_air_speed);
+            if (Calc::abs(mover->speed.x) > maxspd) {
+                mover->speed.x = Calc::approach(
+                        mover->speed.x,
+                        Calc::sign(mover->speed.x) * maxspd,
+                        2000 * Time::delta);
+            }
+
+            // friction
+            if (input == 0 && m_on_ground) {
+                mover->speed.x = Calc::approach(mover->speed.x, 0, friction * Time::delta);
+            }
+
+            // facing direction
+            if (input != 0 && m_on_ground) {
+                m_facing = input;
+            }
+        }
+
+        // invoke jumping
+        {
+            // do the jump
+            if (input_jump.pressed() && m_on_ground) {
+                input_jump.clear_press_buffer();
+
+                // squoosh on jomp
+                anim->scale = Vec2(m_facing * 0.65f, 1.4f);
+
+                // tweak horizontal movement when jumping
+                mover->speed.x = input * max_air_speed;
+                m_jump_timer = jump_time;
+            }
+        }
+
+        // begin attacking
+        if (input_attack.pressed()) {
+            input_attack.clear_press_buffer();
+
+            m_state = st_attack;
+            m_attack_timer = anim->sprite()->get_animation("attack")->duration();
+
+            if (m_on_ground) {
+                mover->stop_x();
+            }
+        }
+    }
+    // ATTACK STATE
+    else if (m_state == st_attack) {
+        anim->play("attack");
+        m_attack_timer -= Time::delta;
+
+        if (m_attack_timer <= 0) {
+            anim->play("idle");
+            m_state = st_normal;
+        }
     }
 
-    // horizontal movement
-    {
-        // acceleration
-        mover->speed.x += input * (m_on_ground ? ground_accel : air_accel) * Time::delta;
+    // variable jumping based on how long the button is held down
+    if (m_jump_timer > 0) {
+        m_jump_timer -= Time::delta;
 
-        // max speed
-        auto maxspd = (m_on_ground ? max_ground_speed : max_air_speed);
-        if (Calc::abs(mover->speed.x) > maxspd) {
-            mover->speed.x = Calc::approach(
-                    mover->speed.x,
-                    Calc::sign(mover->speed.x) * maxspd,
-                    2000 * Time::delta);
-        }
+        mover->speed.y = jump_force;
 
-        // friction
-        if (input == 0 && m_on_ground) {
-            mover->speed.x = Calc::approach(mover->speed.x, 0, friction * Time::delta);
-        }
-
-        // facing direction
-        if (input != 0 && m_on_ground) {
-            m_facing = input;
+        if (!input_jump.down()) {
+            m_jump_timer = 0;
         }
     }
 
@@ -98,30 +155,6 @@ void Player::update() {
         }
 
         mover->speed.y += grav * Time::delta;
-    }
-
-    // jomping
-    {
-        // do the jomp
-        if (input_jump.pressed() && m_on_ground) {
-            // squoosh on jomp
-            anim->scale = Vec2(m_facing * 0.65f, 1.4f);
-
-            // tweak horizontal movement when jumping
-            mover->speed.x = input * max_air_speed;
-            m_jump_timer = jump_time;
-        }
-
-        // variable jumping based on how long the button is held down
-        if (m_jump_timer > 0) {
-            m_jump_timer -= Time::delta;
-
-            mover->speed.y = jump_force;
-
-            if (!input_jump.down()) {
-                m_jump_timer = 0;
-            }
-        }
     }
 }
 
