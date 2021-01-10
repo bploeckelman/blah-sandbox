@@ -79,6 +79,7 @@ void Game::startup() {
 
     // set flags
     m_draw_colliders = false;
+    m_frame_by_frame = false;
 
     // camera setup
     camera = Vec2::zero;
@@ -99,6 +100,11 @@ void Game::update() {
     // toggle collider render
     if (Input::pressed(Key::F1)) {
         m_draw_colliders = !m_draw_colliders;
+    }
+
+    // if flag is enabled, press F12 to progress a frame at a time
+    if (m_frame_by_frame && !Input::pressed(Key::F12)) {
+        return;
     }
 
     // reload current room

@@ -29,7 +29,11 @@ namespace Zen {
         void render();
 
     private:
+        // debug flags
         bool m_draw_colliders;
+        bool m_frame_by_frame;
+
+        // room transition
         bool m_transition = false;
         float m_next_ease;
         Point m_next_room;
