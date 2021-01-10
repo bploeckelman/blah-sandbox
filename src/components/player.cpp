@@ -1,6 +1,7 @@
 #include "player.h"
 #include "mover.h"
 #include "animator.h"
+#include "../masks.h"
 
 using namespace Zen;
 
@@ -117,7 +118,9 @@ void Player::update() {
             input_attack.clear_press_buffer();
 
             m_state = st_attack;
-            m_attack_timer = anim->sprite()->get_animation("attack")->duration();
+            m_attack_timer = 0;
+            m_attack_collider = entity()->add(Collider::make_rect(RectI()));
+            m_attack_collider->mask = Mask::player_attack;
 
             if (m_on_ground) {
                 mover->stop_x();
@@ -127,9 +130,45 @@ void Player::update() {
     // ATTACK STATE
     else if (m_state == st_attack) {
         anim->play("attack");
-        m_attack_timer -= Time::delta;
+        m_attack_timer += Time::delta;
 
-        if (m_attack_timer <= 0) {
+        // setup hitbox (depends on where in the attack animation we currently are)
+        // assumes right facing, if left facing, it flips the hitbox afterwards
+        // NOTE: timer threshold values are hardcoded here, they come from frame durations of each anim frame
+        // NOTE: rects are built based with x,y being offsets from pivot point specified in aseprite
+        if (m_attack_timer < 0.05f) {
+            m_attack_collider->set_rect(RectI(-11, -17, 7, 7));
+        }
+        else if (m_attack_timer < 0.1f) {
+            m_attack_collider->set_rect(RectI(-13, -19, 9, 9));
+        }
+        else if (m_attack_timer < 0.12f) {
+            m_attack_collider->set_rect(RectI(-13, -19, 8, 8));
+        }
+        else if (m_attack_timer < 0.14f) {
+            m_attack_collider->set_rect(RectI(-4, -15, 8, 8));
+        }
+        else if (m_attack_timer < 0.49f) {
+            m_attack_collider->set_rect(RectI(-1, -13, 18, 7));
+        }
+        else if (m_attack_timer < 0.54f) {
+            m_attack_collider->set_rect(RectI(-1, -13, 15, 7));
+        }
+        // done with attack anim, destroy attack collider
+        else if (m_attack_collider) {
+            m_attack_collider->destroy();
+            m_attack_collider = nullptr;
+        }
+
+        // flip hitbox if you're facing left
+        if (m_facing < 0 && m_attack_collider) {
+            auto rect = m_attack_collider->get_rect();
+            rect.x = -(rect.x + rect.w);
+            m_attack_collider->set_rect(rect);
+        }
+
+        // end the attack
+        if (m_attack_timer >= anim->animation()->duration()) {
             anim->play("idle");
             m_state = st_normal;
         }

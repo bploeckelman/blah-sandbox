@@ -9,7 +9,7 @@
 using namespace Zen;
 
 namespace {
-    constexpr float transition_duration = 0.75f;
+    constexpr float transition_duration = 0.5f;
 }
 
 void Game::load_room(Point cell) {
@@ -127,6 +127,8 @@ void Game::update() {
 
                 // see if room exists
                 if (Content::find_room(next_room)) {
+                    Time::pause_for(0.1f);
+
                     // transition to next room
                     m_transition = true;
                     m_next_ease = 0;
@@ -152,13 +154,17 @@ void Game::update() {
             }
         }
     } else {
+        // increment ease
+        m_next_ease = Calc::approach(m_next_ease, 1.0f, Time::delta / transition_duration);
+
+        // get last & next camera positions
         auto last_cam = Vec2(m_last_room.x * width, m_last_room.y * height);
         auto next_cam = Vec2(m_next_room.x * width, m_next_room.y * height);
 
-        // room transition routine
-        m_next_ease = Calc::approach(m_next_ease, 1.0f, Time::delta / transition_duration);
+        // lerp camera position for room transition
         camera = last_cam + (next_cam - last_cam) * Ease::cube_in_out(m_next_ease);
 
+        // finish transition
         if (m_next_ease >= 1.0f) {
             // delete old objects (except player)
             for (auto& it : m_last_entities) {
@@ -166,6 +172,7 @@ void Game::update() {
                 world.destroy_entity(it);
             }
 
+            Time::pause_for(0.1f);
             m_transition = false;
         }
     }

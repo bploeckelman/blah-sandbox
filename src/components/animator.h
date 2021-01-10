@@ -20,6 +20,7 @@ namespace Zen {
         Animator(const String& sprite);
 
         const Sprite* sprite() const;
+        const Sprite::Animation* animation() const;
 
         void play(const String& animation, bool restart = false);
 

@@ -1,5 +1,6 @@
 #pragma once
 #include <blah.h>
+#include "collider.h"
 #include "../world.h"
 
 using namespace Blah;
@@ -26,6 +27,7 @@ namespace Zen {
         float m_jump_timer = 0;
         float m_attack_timer = 0;
         float m_on_ground = false;
+        Collider* m_attack_collider = nullptr;
 
     };
 
