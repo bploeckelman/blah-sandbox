@@ -76,12 +76,16 @@ const Entity* Entity::next() const {
     return m_next;
 }
 
-Blah::Vector<Component*>& Entity::components() {
+Vector<Component*>& Entity::components() {
     return m_components;
 }
 
-const Blah::Vector<Component*>& Entity::components() const {
+const Vector<Component*>& Entity::components() const {
     return m_components;
+}
+
+void Entity::destroy() {
+    m_world->destroy_entity(this);
 }
 
 World::~World() {

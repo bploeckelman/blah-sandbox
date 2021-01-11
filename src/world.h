@@ -86,6 +86,8 @@ namespace Zen {
         Blah::Vector<Component*>& components();
         const Blah::Vector<Component*>& components() const;
 
+        void destroy();
+
     private:
         Blah::Vector<Component*> m_components;
         World *m_world = nullptr;

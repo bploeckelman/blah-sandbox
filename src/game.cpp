@@ -62,6 +62,10 @@ void Game::load_room(Point cell) {
                         Factory::player(&world, world_position + Point(tile_width / 2, tile_height));
                     }
                 } break;
+                // pink is a bramble
+                case 0xd77bba: {
+                    Factory::bramble(&world, world_position + Point(tile_width / 2, tile_height));
+                } break;
             }
         }
     }

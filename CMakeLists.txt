@@ -25,6 +25,7 @@ add_executable(${PROJECT_NAME}
         src/components/player.cpp
         src/components/mover.cpp
         src/components/tilemap.cpp
+        src/components/hurtable.cpp
 )
 
 # reference blah and SDL
