@@ -5,15 +5,16 @@
 #include "components/mover.h"
 #include "components/player.h"
 #include "components/hurtable.h"
+#include "components/timer.h"
 
 using namespace Zen;
 
 Entity* Factory::player(World* world, Point position) {
     auto en = world->add_entity(position);
 
-    auto an = en->add(Animator("player"));
-    an->play("idle");
-    an->depth = -10;
+    auto anim = en->add(Animator("player"));
+    anim->play("idle");
+    anim->depth = -10;
 
     auto hitbox = en->add(Collider::make_rect(RectI(-4, -16, 8, 16)));
 
@@ -28,9 +29,9 @@ Entity* Factory::player(World* world, Point position) {
 Entity* Factory::bramble(World* world, Point position) {
     auto en = world->add_entity(position);
 
-    auto an = en->add(Animator("bramble"));
-    an->play("idle");
-    an->depth = -5;
+    auto anim = en->add(Animator("bramble"));
+    anim->play("idle");
+    anim->depth = -5;
 
     auto hitbox = en->add(Collider::make_rect(RectI(-4, -8, 8, 8)));
     hitbox->mask = Mask::enemy;
@@ -39,8 +40,24 @@ Entity* Factory::bramble(World* world, Point position) {
     hurtable->hurt_by = Mask::player_attack;
     hurtable->collider = hitbox;
     hurtable->on_hurt = [](Hurtable* self) {
+        Time::pause_for(0.1f);
+        pop(self->world(), self->entity()->position + Point(0, -4));
         self->entity()->destroy();
     };
+
+    return en;
+}
+
+Entity* Factory::pop(World* world, Point position) {
+    auto en = world->add_entity(position);
+
+    auto anim = en->add(Animator("pop"));
+    anim->play("pop");
+    anim->depth = -20;
+
+    auto timer = en->add(Timer(anim->animation()->duration(), [](Timer* self) {
+        self->entity()->destroy();
+    }));
 
     return en;
 }

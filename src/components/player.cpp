@@ -149,10 +149,10 @@ void Player::update() {
             m_attack_collider->set_rect(RectI(-4, -15, 8, 8));
         }
         else if (m_attack_timer < 0.49f) {
-            m_attack_collider->set_rect(RectI(-1, -13, 18, 7));
+            m_attack_collider->set_rect(RectI(-1, -13, 18, 10));
         }
         else if (m_attack_timer < 0.54f) {
-            m_attack_collider->set_rect(RectI(-1, -13, 15, 7));
+            m_attack_collider->set_rect(RectI(-1, -13, 15, 10));
         }
         // done with attack anim, destroy attack collider
         else if (m_attack_collider) {
