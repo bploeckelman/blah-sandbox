@@ -24,6 +24,7 @@ void Game::load_room(Point cell) {
     auto castle = Content::find_tileset("castle");
     auto grass = Content::find_tileset("grass");
     auto plants = Content::find_tileset("plants");
+    auto back = Content::find_tileset("back");
 
     // add a floor
     auto floor = world.add_entity(offset);
@@ -46,6 +47,10 @@ void Game::load_room(Point cell) {
                 case 0xffffff: {
                     tilemap->set_cell(x, y, &castle->random_tile());
                     solids->set_cell(x, y, true);
+                } break;
+                // purpleish is background
+                case 0x45283c: {
+                    tilemap->set_cell(x, y, &back->random_tile());
                 } break;
                 // pale green is grass
                 case 0x8f974a: {
