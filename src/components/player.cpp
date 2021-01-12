@@ -12,9 +12,12 @@ namespace {
     constexpr float ground_accel = 500;
     constexpr float air_accel = 20;
     constexpr float friction = 800;
+    constexpr float hurt_friction = 200;
     constexpr float gravity = 450;
     constexpr float jump_force = -105;
     constexpr float jump_time = 0.18f;
+    constexpr float hurt_duration = 0.5f;
+    constexpr float invincible_duration = 1.5f;
 
 }
 
@@ -42,6 +45,7 @@ void Player::update() {
 
     auto mover = get<Mover>();
     auto anim = get<Animator>();
+    auto hitbox = get<Collider>();
     auto was_on_ground = m_on_ground;
     m_on_ground = mover->on_ground();
     int input = input_move.value_i().x;
@@ -119,8 +123,11 @@ void Player::update() {
 
             m_state = st_attack;
             m_attack_timer = 0;
-            m_attack_collider = entity()->add(Collider::make_rect(RectI()));
-            m_attack_collider->mask = Mask::player_attack;
+
+            if (!m_attack_collider) {
+                m_attack_collider = entity()->add(Collider::make_rect(RectI()));
+                m_attack_collider->mask = Mask::player_attack;
+            }
 
             if (m_on_ground) {
                 mover->stop_x();
@@ -173,6 +180,18 @@ void Player::update() {
             m_state = st_normal;
         }
     }
+    // HURT STATE
+    else if (m_state == st_hurt) {
+        m_hurt_timer -= Time::delta;
+        if (m_hurt_timer <= 0) {
+            m_state = st_normal;
+        }
+
+        // friction
+        if (m_on_ground) {
+            mover->speed.x = Calc::approach(mover->speed.x, 0, hurt_friction * Time::delta);
+        }
+    }
 
     // variable jumping based on how long the button is held down
     if (m_jump_timer > 0) {
@@ -185,15 +204,47 @@ void Player::update() {
         }
     }
 
+    // invincible timer
+    if (m_state != st_hurt && m_invincible_timer > 0) {
+        // flicker animation
+        if (Time::on_interval(0.05f)) {
+            anim->visible = !anim->visible;
+        }
+
+        m_invincible_timer -= Time::delta;
+        if (m_invincible_timer <= 0) {
+            anim->visible = true;
+        }
+    }
+
     // gravity
     if (!m_on_ground) {
         // make gravity more 'hovery' when in the air
         float grav = gravity;
-        if (Calc::abs(mover->speed.y) < 20 && input_jump.down()) {
+        if (m_state == st_normal && Calc::abs(mover->speed.y) < 20 && input_jump.down()) {
             grav *= 0.4f;
         }
 
         mover->speed.y += grav * Time::delta;
+    }
+
+    // hurt check (could be done with hurtable component)
+    if (m_invincible_timer <= 0 && hitbox->check(Mask::enemy)) {
+        Time::pause_for(0.1f);
+        anim->play("hurt");
+
+        if (m_attack_collider) {
+            m_attack_collider->destroy();
+            m_attack_collider = nullptr;
+        }
+
+        // for now bounce back is always the reverse direction player is facing
+        mover->speed = Vec2(-m_facing * 100, -80);
+
+        health -= 1;
+        m_hurt_timer = hurt_duration;
+        m_invincible_timer = invincible_duration;
+        m_state = st_hurt;
     }
 }
 
