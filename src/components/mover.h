@@ -2,6 +2,7 @@
 #include <blah.h>
 #include "collider.h"
 #include "../world.h"
+#include <functional>
 
 using namespace Blah;
 
@@ -15,6 +16,8 @@ namespace Zen {
         Collider* collider = nullptr;
         Vec2 speed;
         float gravity = 0;
+        std::function<void(Mover*)> on_hit_x;
+        std::function<void(Mover*)> on_hit_y;
 
         bool move_x(int amount);
         bool move_y(int amount);

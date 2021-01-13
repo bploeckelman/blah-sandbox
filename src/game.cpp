@@ -3,7 +3,6 @@
 #include "content.h"
 #include "factory.h"
 #include "components/player.h"
-#include "components/collider.h"
 #include "components/tilemap.h"
 
 using namespace Zen;
@@ -35,41 +34,52 @@ void Game::load_room(Point cell) {
     // loop over the room grid
     for (int x = 0; x < columns; x++) {
         for (int y = 0; y < rows; y++) {
-            Point world_position = offset + Point(x * tile_width, y * tile_height);
+            Point world_position = offset + Point(x * tile_width, y * tile_height) + Point(tile_width / 2, tile_height);
             Color col = grid->pixels[x + y * columns];
             uint32_t rgb = ((uint32_t)col.r << 16)
                          | ((uint32_t)col.g << 8)
                          | ((uint32_t)col.b << 0);
             switch (rgb) {
                 // black does nothing
-                case 0x000000: break;
-                // white is castle
+                case 0x000000: default: break;
+
+                // castle is white
                 case 0xffffff: {
                     tilemap->set_cell(x, y, &castle->random_tile());
                     solids->set_cell(x, y, true);
                 } break;
-                // purpleish is background
+
+                // background is purpleish
                 case 0x45283c: {
                     tilemap->set_cell(x, y, &back->random_tile());
                 } break;
-                // pale green is grass
+
+                // grass is pale green
                 case 0x8f974a: {
                     tilemap->set_cell(x, y, &grass->random_tile());
                     solids->set_cell(x, y, true);
                 } break;
-                // dark green is plants (not solid)
+
+                // plants (not solid) are dark green
                 case 0x4b692f: {
                     tilemap->set_cell(x, y, &plants->random_tile());
                 } break;
-                // green is player (only create if it doesn't already exist)
+
+                // player is green (only create if it doesn't already exist)
                 case 0x6abe30: {
                     if (!world.first<Player>()) {
-                        Factory::player(&world, world_position + Point(tile_width / 2, tile_height));
+                        Factory::player(&world, world_position);
                     }
                 } break;
-                // pink is a bramble
+
+                // bramble is pink
                 case 0xd77bba: {
-                    Factory::bramble(&world, world_position + Point(tile_width / 2, tile_height));
+                    Factory::bramble(&world, world_position);
+                } break;
+
+                // spitter is red
+                case 0xac3232: {
+                    Factory::spitter(&world, world_position);
                 } break;
             }
         }
@@ -91,8 +101,8 @@ void Game::startup() {
     m_frame_by_frame = false;
 
     // camera setup
-    camera = Vec2::zero;
     load_room(Point(0, 0));
+    camera = Vec2(room.x * width, room.y * height);
 }
 
 void Game::shutdown() {

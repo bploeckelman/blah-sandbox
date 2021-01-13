@@ -9,7 +9,11 @@ bool Mover::move_x(int amount) {
 
         while (amount != 0) {
             if (collider->check(Mask::solid, Point(sign, 0))) {
-                stop_x();
+                if (on_hit_x) {
+                    on_hit_x(this);
+                } else {
+                    stop_x();
+                }
                 return true;
             }
 
@@ -29,7 +33,11 @@ bool Mover::move_y(int amount) {
 
         while (amount != 0) {
             if (collider->check(Mask::solid, Point(0, sign))) {
-                stop_y();
+                if (on_hit_y) {
+                    on_hit_y(this);
+                } else {
+                    stop_y();
+                }
                 return true;
             }
 
