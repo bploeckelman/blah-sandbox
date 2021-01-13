@@ -64,8 +64,18 @@ void Player::update() {
         anim->scale.x = Calc::abs(anim->scale.x) * m_facing;
     }
 
+    // START STATE
+    if (m_state == st_start) {
+        anim->play("beam-in");
+        m_start_timer += Time::delta;
+        if (m_start_timer >= anim->animation()->duration()) {
+            m_start_timer = 0;
+            m_state = st_normal;
+            anim->play("idle");
+        }
+    }
     // NORMAL STATE
-    if (m_state == st_normal) {
+    else if (m_state == st_normal) {
         // current animation
         if (m_on_ground) {
             if (input != 0) {
