@@ -85,8 +85,11 @@ Entity* Factory::spitter(World* world, Point position) {
         }
     };
 
-    auto timer = en->add(Timer(1.0f, [](Timer* self) {
+    en->add(Timer(1.0f, [](Timer* self) {
         bullet(self->world(), self->entity()->position + Point(-8, -8), -1);
+
+        self->get<Animator>()->play("shoot");
+        self->entity()->add(Timer(0.4f, [](Timer* self) { self->get<Animator>()->play("idle"); }));
         self->start(3.0f);
     }));
 
