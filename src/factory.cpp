@@ -136,3 +136,63 @@ Entity* Factory::bullet(World* world, Point position, int direction) {
 
     return en;
 }
+
+namespace {
+
+    class MosquitoBehavior : public Component {
+    public:
+        int health = 2;
+        float timer = 0;
+
+        void update() override {
+            auto mover = get<Mover>();
+            auto player = world()->first<Player>();
+            if (player) {
+                auto sign = Calc::sign(player->entity()->position.x - entity()->position.x);
+                mover->speed.x += sign * 100 * Time::delta;
+
+                if (Calc::abs(mover->speed.x) > 50) {
+                    mover->speed.x = Calc::approach(mover->speed.x, Calc::sign(mover->speed.x) * 50, 800 * Time::delta);
+                }
+
+                mover->speed.y = Calc::sin(timer * 4) * 10;
+            }
+
+            timer += Time::delta * 4;
+        }
+
+        void hurt() {
+            health--;
+            if (health <= 0) {
+                Factory::pop(world(), entity()->position);
+                entity()->destroy();
+            } else {
+                auto mover = get<Mover>();
+                auto player = world()->first<Player>();
+                auto sign = Calc::sign(player->entity()->position.x - entity()->position.x);
+                mover->speed.x = -sign * 140;
+            }
+        }
+    };
+
+}
+
+Entity *Factory::mosquito(World *world, Point position) {
+    auto en = world->add_entity(position);
+    en->add(MosquitoBehavior());
+    en->add(Mover());
+
+    auto anim = en->add(Animator("mosquito"));
+    anim->play("idle");
+    anim->depth = -5;
+
+    auto hitbox = en->add(Collider::make_rect(RectI(-7, -4, 15, 8)));
+    hitbox->mask = Mask::enemy;
+
+    auto hurtable = en->add(Hurtable());
+    hurtable->hurt_by = Mask::player_attack;
+    hurtable->collider = hitbox;
+    hurtable->on_hurt = [](Hurtable *self) { self->get<MosquitoBehavior>()->hurt(); };
+
+    return en;
+}

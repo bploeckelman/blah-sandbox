@@ -81,6 +81,11 @@ void Game::load_room(Point cell) {
                 case 0xac3232: {
                     Factory::spitter(&world, world_position);
                 } break;
+
+                // mosquito is yellow
+                case 0xfbf236: {
+                    Factory::mosquito(&world, world_position - Point(0, tile_height / 2));
+                } break;
             }
         }
     }
@@ -101,7 +106,7 @@ void Game::startup() {
     m_frame_by_frame = false;
 
     // camera setup
-    load_room(Point(0, 0));
+    load_room(Point(3, 0));
     camera = Vec2(room.x * width, room.y * height);
 }
 
