@@ -148,8 +148,14 @@ namespace {
             auto mover = get<Mover>();
             auto player = world()->first<Player>();
             if (player) {
-                auto sign = Calc::sign(player->entity()->position.x - entity()->position.x);
-                mover->speed.x += sign * 100 * Time::delta;
+                auto diff = player->entity()->position.x - entity()->position.x;
+                auto dist = Calc::abs(diff);
+
+                if (dist < 100) {
+                    mover->speed.x += Calc::sign(diff) * 100 * Time::delta;
+                } else {
+                    mover->speed.x = Calc::approach(mover->speed.x, 0, 100 * Time::delta);
+                }
 
                 if (Calc::abs(mover->speed.x) > 50) {
                     mover->speed.x = Calc::approach(mover->speed.x, Calc::sign(mover->speed.x) * 50, 800 * Time::delta);

@@ -106,7 +106,7 @@ void Game::startup() {
     m_frame_by_frame = false;
 
     // camera setup
-    load_room(Point(3, 0));
+    load_room(Point(5, 1));
     camera = Vec2(room.x * width, room.y * height);
 }
 
@@ -179,7 +179,13 @@ void Game::update() {
                     // no next room, keep player in this room
                     player->entity()->position = Point(
                             Calc::clamp_int(pos.x, bounds.x, bounds.x + bounds.w),
-                            Calc::clamp_int(pos.y, bounds.y, bounds.y + bounds.h));
+                            Calc::clamp_int(pos.y, bounds.y, bounds.y + bounds.h + 100));
+
+                    // reload if they fell out the bottom
+                    if (player->entity()->position.y > bounds.y + bounds.h + 64) {
+                        world.clear();
+                        load_room(room);
+                    }
                 }
             }
         }
