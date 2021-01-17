@@ -4,6 +4,7 @@
 #include "components/collider.h"
 #include "components/mover.h"
 #include "components/player.h"
+#include "components/enemy.h"
 #include "components/hurtable.h"
 #include "components/timer.h"
 
@@ -16,7 +17,7 @@ Entity* Factory::player(World* world, Point position) {
     anim->play("idle");
     anim->depth = -10;
 
-    auto hitbox = en->add(Collider::make_rect(RectI(-4, -16, 8, 16)));
+    auto hitbox = en->add(Collider::make_rect(RectI(-4, -14, 8, 14)));
 
     auto mover = en->add(Mover());
     mover->collider = hitbox;
@@ -64,6 +65,7 @@ Entity* Factory::pop(World* world, Point position) {
 
 Entity* Factory::spitter(World* world, Point position) {
     auto en = world->add_entity(position);
+    en->add(Enemy());
 
     auto anim = en->add(Animator("spitter"));
     anim->play("idle");
@@ -186,6 +188,7 @@ namespace {
 Entity *Factory::mosquito(World *world, Point position) {
     auto en = world->add_entity(position);
     en->add(MosquitoBehavior());
+    en->add(Enemy());
     en->add(Mover());
 
     auto anim = en->add(Animator("mosquito"));
@@ -199,6 +202,29 @@ Entity *Factory::mosquito(World *world, Point position) {
     hurtable->hurt_by = Mask::player_attack;
     hurtable->collider = hitbox;
     hurtable->on_hurt = [](Hurtable *self) { self->get<MosquitoBehavior>()->hurt(); };
+
+    return en;
+}
+
+Entity *Factory::door(World *world, Point position) {
+    auto en = world->add_entity(position);
+
+    auto anim = en->add(Animator("door"));
+    anim->play("idle");
+    anim->depth = -1;
+
+    auto hitbox = en->add(Collider::make_rect(RectI(-6, -16, 12, 16)));
+    hitbox->mask = Mask::solid;
+
+    // check if all enemies are dead
+    en->add(Timer(0.25f, [](Timer* self) {
+        if (!self->world()->first<Enemy>()) {
+            Factory::pop(self->world(), self->entity()->position + Point(0, -8));
+            self->entity()->destroy();
+        } else {
+            self->start(0.25f);
+        }
+    }));
 
     return en;
 }

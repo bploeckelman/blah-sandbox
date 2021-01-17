@@ -65,6 +65,11 @@ void Game::load_room(Point cell) {
                     tilemap->set_cell(x, y, &plants->random_tile());
                 } break;
 
+                // doors are grayish
+                case 0xcbdbfc: {
+                    Factory::door(&world, world_position);
+                } break;
+
                 // player is green (only create if it doesn't already exist)
                 case 0x6abe30: {
                     if (!world.first<Player>()) {
@@ -106,7 +111,7 @@ void Game::startup() {
     m_frame_by_frame = false;
 
     // camera setup
-    load_room(Point(0, 0));
+    load_room(Point(5, 1));
     camera = Vec2(room.x * width, room.y * height);
 }
 
