@@ -91,6 +91,11 @@ void Game::load_room(Point cell) {
                 case 0xfbf236: {
                     Factory::mosquito(&world, world_position - Point(0, tile_height / 2));
                 } break;
+
+                // blob is dark blue
+                case 0x3f3f74: {
+                    Factory::blob(&world, world_position);
+                } break;
             }
         }
     }
@@ -111,7 +116,7 @@ void Game::startup() {
     m_frame_by_frame = false;
 
     // camera setup
-    load_room(Point(5, 1));
+    load_room(Point(7, 1));
     camera = Vec2(room.x * width, room.y * height);
 }
 

@@ -228,3 +228,67 @@ Entity *Factory::door(World *world, Point position) {
 
     return en;
 }
+
+Entity* Factory::blob(World* world, Point position) {
+    auto en = world->add_entity(position);
+    en->add(Enemy());
+
+    auto anim = en->add(Animator("blob"));
+    anim->play("idle");
+    anim->depth = -5;
+
+    auto hitbox = en->add(Collider::make_rect(RectI(-7, -13, 14, 13)));
+    hitbox->mask = Mask::enemy;
+
+    auto mover = en->add(Mover());
+    mover->collider = hitbox;
+    mover->gravity = 300;
+    mover->friction = 400;
+    mover->on_hit_y = [](Mover* self) {
+        self->get<Animator>()->play("idle");
+        self->stop_y();
+    };
+
+    // jump timer
+    en->add(Timer(2.0f, [](Timer* self) {
+        auto mover = self->get<Mover>();
+        if (!mover->on_ground()) {
+            self->start(0.05f);
+        } else {
+            self->start(2.0f);
+
+            self->get<Animator>()->play("jump");
+            mover->speed.y = -90;
+
+            auto player = self->world()->first<Player>();
+            if (player) {
+                auto dir = Calc::sign(player->entity()->position.x - self->entity()->position.x);
+                if (dir == 0) {
+                    dir = 1;
+                }
+                self->get<Animator>()->scale = Vec2(dir, 1);
+
+                mover->speed.x = dir * 40;
+            }
+        }
+    }));
+
+    auto hurtable = en->add(Hurtable());
+    hurtable->hurt_by = Mask::player_attack;
+    hurtable->collider = hitbox;
+    hurtable->on_hurt = [health = 3](Hurtable *self) mutable {
+        auto player = self->world()->first<Player>();
+        if (player) {
+            auto mover = self->get<Mover>();
+            mover->speed.x = Calc::sign(self->entity()->position.x - player->entity()->position.x) * 80;
+        }
+
+        health--;
+        if (health <= 0) {
+            Factory::pop(self->world(), self->entity()->position + Point(0, -4));
+            self->entity()->destroy();
+        }
+    };
+
+    return en;
+}

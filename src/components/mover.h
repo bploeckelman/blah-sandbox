@@ -16,6 +16,7 @@ namespace Zen {
         Collider* collider = nullptr;
         Vec2 speed;
         float gravity = 0;
+        float friction = 0;
         std::function<void(Mover*)> on_hit_x;
         std::function<void(Mover*)> on_hit_y;
 

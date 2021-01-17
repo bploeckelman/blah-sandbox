@@ -14,6 +14,7 @@ namespace Zen {
         Entity* bullet(World* world, Point position, int direction);
         Entity* mosquito(World* world, Point position);
         Entity* door(World* world, Point position);
+        Entity* blob(World* world, Point position);
     }
 
 }
