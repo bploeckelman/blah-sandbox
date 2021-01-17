@@ -106,7 +106,7 @@ void Game::startup() {
     m_frame_by_frame = false;
 
     // camera setup
-    load_room(Point(5, 1));
+    load_room(Point(0, 0));
     camera = Vec2(room.x * width, room.y * height);
 }
 
