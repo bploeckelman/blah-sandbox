@@ -77,7 +77,7 @@ Entity* Factory::spitter(World* world, Point position) {
     auto hurtable = en->add(Hurtable());
     hurtable->hurt_by = Mask::player_attack;
     hurtable->collider = hitbox;
-    hurtable->on_hurt = [health = 2](Hurtable* self) mutable {
+    hurtable->on_hurt = [health = 1](Hurtable* self) mutable {
         health--;
         self->flicker_timer = 1;
         if (health <= 0) {
