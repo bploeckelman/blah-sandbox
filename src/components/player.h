@@ -15,7 +15,9 @@ namespace Zen {
         static constexpr int st_hurt   = 2;
         static constexpr int st_start  = 3;
 
-        int health = 3;
+        static constexpr int max_health = 3;
+
+        int health = max_health;
 
         VirtualStick input_move;
         VirtualButton input_jump;
@@ -35,7 +37,6 @@ namespace Zen {
         float m_start_timer = 0;
         float m_on_ground = false;
         Collider* m_attack_collider = nullptr;
-
     };
 
 }

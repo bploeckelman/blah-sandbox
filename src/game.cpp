@@ -229,10 +229,13 @@ void Game::render() {
     {
         buffer->clear(0x150e22);
 
+        // push camera offset
         batch.push_matrix(Mat3x2::create_translation(-camera));
         {
+            // draw gameplay objects
             world.render(batch);
 
+            // draw debug colliders
             if (m_draw_colliders) {
                 auto collider = world.first<Collider>();
                 while (collider) {
@@ -241,8 +244,30 @@ void Game::render() {
                 }
             }
         }
+        // end camera offset
         batch.pop_matrix();
 
+        // draw health
+        auto player = world.first<Player>();
+        if (player) {
+            auto heart = Content::find_sprite("heart");
+            auto full = heart->get_animation("full");
+            auto empty = heart->get_animation("empty");
+
+            auto pos = Point(0, height - 16);
+            batch.rect(Rect(pos.x, pos.y + 7, 40, 4), Color::black);
+
+            for (int i = 0; i < Player::max_health; i++) {
+                if (player->health >= i + 1) {
+                    batch.tex(full->frames[0].image, pos, Color::red);
+                } else {
+                    batch.tex(empty->frames[0].image, pos);
+                }
+                pos.x += 12;
+            }
+        }
+
+        // draw to gameplay buffer
         batch.render(buffer);
         batch.clear();
     }
