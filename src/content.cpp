@@ -50,6 +50,7 @@ void Content::load() {
 
     // load the main font
     font = SpriteFont(path() + "fonts/dogica.ttf", 8, SpriteFont::ASCII);
+    font.line_gap = 4;
 
     // load sprites
     Vector<SpriteInfo> sprite_info;

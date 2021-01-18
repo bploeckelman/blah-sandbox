@@ -16,6 +16,9 @@ namespace Zen {
         static constexpr int columns = width / tile_width;
         static constexpr int rows = height / tile_height + 1;
 
+        static inline const char* title = "SWORD II: DONK'S ADVENTURE";
+        static inline const char* controls = "arrow keys + X / Z\nstick + A / X";
+
         World world;
         FrameBufferRef buffer;
         Batch batch;

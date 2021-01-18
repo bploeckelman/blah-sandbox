@@ -128,7 +128,7 @@ void Game::startup() {
     m_frame_by_frame = false;
 
     // camera setup
-    load_room(Point(8, 1));
+    load_room(Point(0, 0));
     camera = Vec2(room.x * width, room.y * height);
 }
 
@@ -284,6 +284,18 @@ void Game::render() {
         }
         // end camera offset
         batch.pop_matrix();
+
+        // hacky start / end screen text
+        if (room == Point(0, 0)) {
+            auto w = Content::font.width_of(title);
+            auto pos = Point((width - w) / 2, 20);
+            batch.str(Content::font, title, pos + Point(0, 1), Color::black);
+            batch.str(Content::font, title, pos, Color::white);
+
+            w = Content::font.width_of(controls);
+            pos = Point((width - w) / 2, 40);
+            batch.str(Content::font, controls, pos, Color::white * 0.25f);
+        }
 
         // draw health
         auto player = world.first<Player>();
