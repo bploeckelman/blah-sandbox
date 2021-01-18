@@ -18,6 +18,7 @@ namespace Zen {
 
         static inline const char* title = "SWORD II: DONK'S ADVENTURE";
         static inline const char* controls = "arrow keys + X / Z\nstick + A / X";
+        static inline const char* ending = "YOU SAVED DONK\nAND YOU ARE\nA REAL DONKIN' HERO";
 
         World world;
         FrameBufferRef buffer;

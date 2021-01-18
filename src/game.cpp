@@ -56,7 +56,7 @@ void Game::load_room(Point cell, bool is_reload) {
                     tilemap->set_cell(x, y, &back->random_tile());
                 } break;
 
-                // orange is jumpthru platforms
+                // jumpthru platform is orange
                 case 0xdf7126: {
                     tilemap->set_cell(x, y, &jumpthru->random_tile());
                     auto jumpthru_en = world.add_entity(offset + Point(x * tile_width, y * tile_height));
@@ -78,6 +78,11 @@ void Game::load_room(Point cell, bool is_reload) {
                 // doors are grayish
                 case 0xcbdbfc: {
                     Factory::door(&world, world_position);
+                } break;
+
+                // closing doors (boss room) are more grayish
+                case 0x9badb7: {
+                    Factory::door(&world, world_position, true);
                 } break;
 
                 // player is green (only create if it doesn't already exist)
@@ -128,7 +133,7 @@ void Game::startup() {
     m_frame_by_frame = false;
 
     // camera setup
-    load_room(Point(0, 0));
+    load_room(Point(11, 0));
     camera = Vec2(room.x * width, room.y * height);
 }
 
@@ -295,6 +300,12 @@ void Game::render() {
             w = Content::font.width_of(controls);
             pos = Point((width - w) / 2, 40);
             batch.str(Content::font, controls, pos, Color::white * 0.25f);
+        } else if (room == Point(13, 0)) {
+            auto w = Content::font.width_of(ending);
+//            auto pos = Point(room.x * width + (width - w) / 2, room.y * height + 20);
+            auto pos = Point((width - w) / 2, 20);
+            batch.str(Content::font, ending, pos + Point(0, 1), TextAlign::Top, 8, Color::black);
+            batch.str(Content::font, ending, pos, TextAlign::Top, 8, Color::white);
         }
 
         // draw health
