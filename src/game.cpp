@@ -198,8 +198,23 @@ void Game::update() {
                     }
                 }
             }
+
+            // death ... delete everything except the player
+            // then the player falls out of the room causing the room to reload
+            if (player->health <= 0) {
+                auto e = world.first_entity();
+                while (e) {
+                    auto next = e->next();
+                    if (!e->get<Player>()) {
+                        world.destroy_entity(e);
+                    }
+                    e = next;
+                }
+            }
         }
-    } else {
+    }
+    // room transition
+    else {
         // increment ease
         m_next_ease = Calc::approach(m_next_ease, 1.0f, Time::delta / transition_duration);
 
