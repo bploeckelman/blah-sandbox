@@ -165,8 +165,8 @@ void Game::update() {
                 if (pos.x < 0) next_room.x--;
                 if (pos.y < 0) next_room.y--;
 
-                // see if room exists
-                if (Content::find_room(next_room)) {
+                // see if room exists and player isn't dead
+                if (player->health > 0 && Content::find_room(next_room)) {
                     Time::pause_for(0.1f);
 
                     // transition to next room
