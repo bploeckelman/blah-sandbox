@@ -280,7 +280,8 @@ Entity* Factory::blob(World* world, Point position) {
         auto player = self->world()->first<Player>();
         if (player) {
             auto mover = self->get<Mover>();
-            mover->speed.x = Calc::sign(self->entity()->position.x - player->entity()->position.x) * 80;
+            auto sign = Calc::sign(self->entity()->position.x - player->entity()->position.x);
+            mover->speed.x = sign * 120;
         }
 
         health--;
