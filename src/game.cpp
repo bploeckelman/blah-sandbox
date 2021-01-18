@@ -25,6 +25,7 @@ void Game::load_room(Point cell, bool is_reload) {
     auto grass = Content::find_tileset("grass");
     auto plants = Content::find_tileset("plants");
     auto back = Content::find_tileset("back");
+    auto jumpthru = Content::find_tileset("jumpthru");
 
     // add a floor
     auto floor = world.add_entity(offset);
@@ -53,6 +54,14 @@ void Game::load_room(Point cell, bool is_reload) {
                 // background is purpleish
                 case 0x45283c: {
                     tilemap->set_cell(x, y, &back->random_tile());
+                } break;
+
+                // orange is jumpthru platforms
+                case 0xdf7126: {
+                    tilemap->set_cell(x, y, &jumpthru->random_tile());
+                    auto jumpthru_en = world.add_entity(offset + Point(x * tile_width, y * tile_height));
+                    auto jumpthru_col = jumpthru_en->add(Collider::make_rect(RectI(0, 0, 8, 4)));
+                    jumpthru_col->mask = Mask::jumpthru;
                 } break;
 
                 // grass is pale green
@@ -119,7 +128,7 @@ void Game::startup() {
     m_frame_by_frame = false;
 
     // camera setup
-    load_room(Point(9, 0));
+    load_room(Point(8, 1));
     camera = Vec2(room.x * width, room.y * height);
 }
 

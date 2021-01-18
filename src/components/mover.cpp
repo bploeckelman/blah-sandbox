@@ -32,7 +32,19 @@ bool Mover::move_y(int amount) {
         int sign = Calc::sign(amount);
 
         while (amount != 0) {
-            if (collider->check(Mask::solid, Point(0, sign))) {
+            // if hit solid
+            bool hit_something = collider->check(Mask::solid, Point(0, sign));
+
+            // no solid, but we're moving down, so check for jumpthru
+            // but only if we're not already overlapping a jumpthru
+            if (!hit_something && sign > 0) {
+                auto about_to_overlap_jumpthru        =  collider->check(Mask::jumpthru, Point(0, sign));
+                auto not_already_overlapping_jumpthru = !collider->check(Mask::jumpthru, Point(0, 0));
+                hit_something = (about_to_overlap_jumpthru && not_already_overlapping_jumpthru);
+            }
+
+            // stop movement
+            if (hit_something) {
                 if (on_hit_y) {
                     on_hit_y(this);
                 } else {
@@ -73,7 +85,13 @@ bool Mover::on_ground(int dist) const{
         return false;
     }
 
-    return collider->check(Mask::solid, Point(0, dist));
+    auto about_to_overlap_jumpthru        =  collider->check(Mask::jumpthru, Point(0, dist));
+    auto not_already_overlapping_jumpthru = !collider->check(Mask::jumpthru, Point(0, 0));
+    auto hit_jumpthru = (about_to_overlap_jumpthru && not_already_overlapping_jumpthru);
+
+    auto hit_solid = collider->check(Mask::solid, Point(0, dist));
+
+    return hit_solid || hit_jumpthru;
 }
 
 void Mover::update() {
