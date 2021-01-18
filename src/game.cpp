@@ -246,7 +246,7 @@ void Game::update() {
             if (m_next_room.y < m_last_room.y) {
                 auto player = world.first<Player>();
                 if (player) {
-                    player->get<Mover>()->speed = Vec2(100, -200);
+                    player->get<Mover>()->speed = Vec2(0, -150);
                 }
             }
 
