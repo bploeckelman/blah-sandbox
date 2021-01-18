@@ -119,7 +119,7 @@ void Game::startup() {
     m_frame_by_frame = false;
 
     // camera setup
-    load_room(Point(7, 1));
+    load_room(Point(9, 0));
     camera = Vec2(room.x * width, room.y * height);
 }
 
@@ -169,7 +169,10 @@ void Game::update() {
                 if (pos.y < 0) next_room.y--;
 
                 // see if room exists and player isn't dead
-                if (player->health > 0 && Content::find_room(next_room)) {
+                auto player_is_alive = player->health > 0;
+                auto next_room_exists = Content::find_room(next_room);
+                auto next_room_is_forward = next_room.x >= room.x;
+                if (player_is_alive && next_room_exists && next_room_is_forward) {
                     Time::pause_for(0.1f);
 
                     // transition to next room
