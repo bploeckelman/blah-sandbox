@@ -4,6 +4,7 @@
 #include "factory.h"
 #include "components/player.h"
 #include "components/tilemap.h"
+#include "components/mover.h"
 
 using namespace Zen;
 
@@ -11,7 +12,7 @@ namespace {
     constexpr float transition_duration = 0.5f;
 }
 
-void Game::load_room(Point cell) {
+void Game::load_room(Point cell, bool is_reload) {
     const Image* grid = Content::find_room(cell);
     BLAH_ASSERT(grid != nullptr, "Room doesn't exist!");
     room = cell;
@@ -73,6 +74,8 @@ void Game::load_room(Point cell) {
                 // player is green (only create if it doesn't already exist)
                 case 0x6abe30: {
                     if (!world.first<Player>()) {
+                        // TODO: this is janked if is_reload and player starts in a tight area
+//                        Factory::player(&world, world_position + (is_reload ? Point(0, -16) : Point::zero));
                         Factory::player(&world, world_position);
                     }
                 } break;
@@ -194,7 +197,7 @@ void Game::update() {
                     // reload if they fell out the bottom
                     if (player->entity()->position.y > bounds.y + bounds.h + 64) {
                         world.clear();
-                        load_room(room);
+                        load_room(room, true);
                     }
                 }
             }
@@ -227,6 +230,14 @@ void Game::update() {
 
         // finish transition
         if (m_next_ease >= 1.0f) {
+            // boost player up if moving to a higher room
+            if (m_next_room.y < m_last_room.y) {
+                auto player = world.first<Player>();
+                if (player) {
+                    player->get<Mover>()->speed = Vec2(100, -200);
+                }
+            }
+
             // delete old objects (except player)
             for (auto& it : m_last_entities) {
                 if (it->get<Player>()) continue;
