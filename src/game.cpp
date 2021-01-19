@@ -133,7 +133,7 @@ void Game::startup() {
     m_frame_by_frame = false;
 
     // camera setup
-    load_room(Point(11, 0));
+    load_room(Point(13, 0));
     camera = Vec2(room.x * width, room.y * height);
 }
 
@@ -302,8 +302,7 @@ void Game::render() {
             batch.str(Content::font, controls, pos, Color::white * 0.25f);
         } else if (room == Point(13, 0)) {
             auto w = Content::font.width_of(ending);
-//            auto pos = Point(room.x * width + (width - w) / 2, room.y * height + 20);
-            auto pos = Point((width - w) / 2, 20);
+            auto pos = Point(width / 2, 20);
             batch.str(Content::font, ending, pos + Point(0, 1), TextAlign::Top, 8, Color::black);
             batch.str(Content::font, ending, pos, TextAlign::Top, 8, Color::white);
         }
