@@ -1,5 +1,6 @@
 #include "content.h"
 #include "game.h"
+#include <tmxlite/Map.hpp>
 
 using namespace Blah;
 using namespace Zen;
@@ -22,6 +23,9 @@ namespace {
     Vector<Subtexture> subtextures;
     Vector<RoomInfo> rooms;
     TextureRef sprite_atlas;
+
+    tmx::Map map;
+
 }
 
 SpriteFont Content::font;
@@ -173,6 +177,23 @@ void Content::load() {
         BLAH_ASSERT(info.image.height == Game::rows, "Room is incorrect height!");
 
         rooms.push_back(info);
+    }
+
+    auto filepath = path() + "tiled/test.tmx";
+    if (map.load(filepath.cstr())) {
+        // read layers and create data structures
+        auto& layers = map.getLayers();
+        for (auto& layer : layers) {
+            auto msg = "map layer: " + layer->getName();
+            Log::print(msg.c_str());
+        }
+
+        // read tilesets and create data structures
+        auto& map_tilesets = map.getTilesets();
+        for (auto& tileset : map_tilesets) {
+            auto msg = "map tileset: " + tileset.getName();
+            Log::print(msg.c_str());
+        }
     }
 }
 

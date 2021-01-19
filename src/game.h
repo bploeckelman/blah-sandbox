@@ -44,6 +44,8 @@ namespace Zen {
         Point m_next_room;
         Point m_last_room;
         Vector<Entity*> m_last_entities;
+
+        void load_map(const char *string);
     };
 
 }

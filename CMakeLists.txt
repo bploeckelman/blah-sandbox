@@ -8,6 +8,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SDL2_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/libs/sdl/include)
 add_subdirectory(libs/sdl)
 
+# include tmxlite
+add_subdirectory(libs/tmxlite/tmxlite)
+
 # include blah
 add_subdirectory(libs/blah)
 
@@ -31,7 +34,7 @@ add_executable(${PROJECT_NAME}
 
 # reference blah and SDL
 # NOTE: without linking SDL here we get unresolved externals during the link step for blah
-target_link_libraries(${PROJECT_NAME} blah SDL2)
+target_link_libraries(${PROJECT_NAME} blah SDL2 tmxlite)
 
 # copy SDL2 to the build dir
 # TODO: don't think this is working correctly, need to determine dll name based on target m_type?

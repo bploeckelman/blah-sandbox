@@ -4,3 +4,6 @@
 [submodule "libs/sdl"]
 	path = libs/sdl
 	url = https://github.com/spurious/SDL-mirror
+[submodule "libs/tmxlite"]
+	path = libs/tmxlite
+	url = https://github.com/fallahn/tmxlite.git
