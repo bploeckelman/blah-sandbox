@@ -1,6 +1,9 @@
 #include "content.h"
 #include "game.h"
 #include <tmxlite/Map.hpp>
+#include <tmxlite/TileLayer.hpp>
+#include <tmxlite/ImageLayer.hpp>
+#include <tmxlite/LayerGroup.hpp>
 
 using namespace Blah;
 using namespace Zen;
@@ -182,17 +185,42 @@ void Content::load() {
     auto filepath = path() + "tiled/test.tmx";
     if (map.load(filepath.cstr())) {
         // read layers and create data structures
-        auto& layers = map.getLayers();
-        for (auto& layer : layers) {
+        const auto& layers = map.getLayers();
+        for (const auto& layer : layers) {
+            switch (layer->getType()) {
+                case tmx::Layer::Type::Tile: {
+                    const auto& tile_layer = layer->getLayerAs<tmx::TileLayer>();
+                    const auto& tiles = tile_layer.getTiles();
+                    for (const auto& tile : tiles) {
+                        // todo: instantiate tile
+                    }
+                } break;
+                case tmx::Layer::Type::Object: {
+                    const auto& object_layer = layer->getLayerAs<tmx::ObjectGroup>();
+                    const auto& objects = object_layer.getObjects();
+                    for (const auto& object : objects) {
+                        // todo: instantiate object
+                    }
+                } break;
+                case tmx::Layer::Type::Image: {
+                    const auto& image_layer = layer->getLayerAs<tmx::ImageLayer>();
+                    const auto& image_path = image_layer.getImagePath();
+                    // todo: load image and instantiate world object
+                } break;
+                case tmx::Layer::Type::Group: {
+                    auto msg = "TMX group layers are unsupported: " + layer->getName() + ", skipping...";
+                    Log::print(msg.c_str());
+                } break;
+            }
             auto msg = "map layer: " + layer->getName();
             Log::print(msg.c_str());
         }
 
         // read tilesets and create data structures
-        auto& map_tilesets = map.getTilesets();
-        for (auto& tileset : map_tilesets) {
-            auto msg = "map tileset: " + tileset.getName();
-            Log::print(msg.c_str());
+        const auto& map_tilesets = map.getTilesets();
+        for (const auto& tileset : map_tilesets) {
+            const auto& image_path = tileset.getImagePath();
+            // todo: load tileset image and instantiate map from tile gid -> texture
         }
     }
 }

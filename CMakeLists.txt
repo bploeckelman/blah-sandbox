@@ -9,6 +9,7 @@ set(SDL2_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/libs/sdl/include)
 add_subdirectory(libs/sdl)
 
 # include tmxlite
+set(TMXLITE_STATIC_LIB TRUE)
 add_subdirectory(libs/tmxlite/tmxlite)
 
 # include blah
